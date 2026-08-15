@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id          String      @id
+  nombre      String      @db.VarChar(100)
+  email       String      @unique @db.VarChar(150)
+  creadoEn    DateTime    @default(now()) @map("creado_en") @db.Timestamptz(6)
+  inversiones Inversion[]
+
+  @@map("usuarios")
+}
+
+model Inversion {
+  id         String   @id
+  usuarioId  String   @map("usuario_id")
+  monto      Decimal  @db.Decimal(12, 2)
+  plazoMeses Int      @map("plazo_meses")
+  tasaAnual  Decimal  @map("tasa_anual") @db.Decimal(5, 4)
+  ganancia   Decimal  @db.Decimal(12, 2)
+  montoFinal Decimal  @map("monto_final") @db.Decimal(12, 2)
+  estado     String   @default("activa") @db.VarChar(20)
+  creadaEn   DateTime @default(now()) @map("creada_en") @db.Timestamptz(6)
+  usuario    Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId])
+  @@map("inversiones")
+}
